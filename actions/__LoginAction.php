@@ -10,8 +10,8 @@ class __LoginAction extends YesWikiAction
 {
     public function run()
     {
-        $authController = $this->services->get(AuthController::class);
-        $userManager = $this->services->get(UserManager::class);
+        $authController = $this->getService(AuthController::class);
+        $userManager = $this->getService(UserManager::class);
 
         if (empty($_SERVER['REMOTE_USER'])) {
             // disconnect any connected user
