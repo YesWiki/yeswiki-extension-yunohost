@@ -6,7 +6,7 @@ use YesWiki\Core\Service\UserManager;
 $authController = $this->services->get(AuthController::class);
 $userManager = $this->services->get(UserManager::class);
 
-if (!empty($_SERVER['REMOTE_USER'])) {
+if (empty($_SERVER['REMOTE_USER'])) {
     // disconnect any connected user
     $authController->logout();
 } else {
