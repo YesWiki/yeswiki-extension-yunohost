@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF8"?>
+<plugin name="ywyunohost" version="1.0" active="1">
+  <author>Florian Schmitt <mrflos@chmok.net></author>
+  <author>DouzeB <fabrice.bellamy@distrilab.fr></author>
+  <label>YunoHost</label>
+  <desc>SSO, user management, app importers for YunoHost</desc>
+</plugin>
