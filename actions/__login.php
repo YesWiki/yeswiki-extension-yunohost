@@ -24,9 +24,15 @@ if (empty($_SERVER['REMOTE_USER'])) {
         $user = $userManager->getOneByName($_SERVER['REMOTE_USER']);
         if (!$user) {
             // user needs to be created
+            $output = null;
+            $retval = null;
+            exec('sudo /usr/local/bin/yunohost-user-info.sh ' . escapeshellcmd($_SERVER['REMOTE_USER']) . ' --output-as json', $output, $retval);
 
-            // TODO how to get the real email ? yunohost:cli ?
-            $email = $_SERVER['REMOTE_USER'].'@yunohost.local';
+            if ($retval == 0) {
+                $email = json_decode($output[0])->mail;
+            } else {
+                exit('yunohost user info returned an error!');
+            }
 
             // add to local database
             $userManager->create($_SERVER['REMOTE_USER'], $email, 'Password handled by YunoHost SSO');
@@ -35,6 +41,8 @@ if (empty($_SERVER['REMOTE_USER'])) {
         }
 
         // login user
-        $authController->login($user);
+        if ($user) {
+            $authController->login($user);
+        }
     }
 }
