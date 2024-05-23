@@ -21,7 +21,7 @@ if (empty($_SERVER['REMOTE_USER'])) {
         }
     }
     if ($needLogin) {
-        $user = $authController->getOneByName($_SERVER['REMOTE_USER']);
+        $user = $userManager->getOneByName($_SERVER['REMOTE_USER']);
         if (!$user) {
             // user needs to be created
 
@@ -31,7 +31,7 @@ if (empty($_SERVER['REMOTE_USER'])) {
             // add to local database
             $userManager->create($_SERVER['REMOTE_USER'], $email, 'Password handled by YunoHost SSO');
             // get the user's info for login
-            $user = $authController->getOneByName($_SERVER['REMOTE_USER']);
+            $user = $userManager->getOneByName($_SERVER['REMOTE_USER']);
         }
 
         // login user
