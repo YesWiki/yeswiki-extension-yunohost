@@ -83,14 +83,14 @@ EOT,
 
     public function getData()
     {
-        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-app-list.sh --output-as json 2>&1', $output, $retval);
+        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-app-list.sh --full --output-as json 2>&1', $output, $retval);
 
         if ($retval == 0) {
             $data = json_decode($output[0], true)['apps'] ?? null;
         } else {
             exit('yunohost-app-list.sh returned an error:'."\n".implode('<br>', $output)."\n");
         }
-        return $data['apps'] ?? null;
+        return $data ?? null;
     }
 
     public function mapData($data)
