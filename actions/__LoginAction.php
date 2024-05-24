@@ -15,7 +15,6 @@ class __LoginAction extends YesWikiAction
             $this->params->get('enable_yunohost_sso')) {
             $authController = $this->getService(AuthController::class);
             $userManager = $this->getService(UserManager::class);
-            $_SERVER['REMOTE_USER'] = 'toto';
             if (empty($_SERVER['REMOTE_USER'])) {
                 // disconnect any connected user
                 $authController->logout();
