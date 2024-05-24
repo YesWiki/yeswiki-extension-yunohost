@@ -1,6 +1,6 @@
 <?php
 
-namespace YesWiki\Importer\Commands;
+namespace YesWiki\Yunohost\Commands;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

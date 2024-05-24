@@ -81,53 +81,32 @@ EOT,
         return $config;
     }
 
-    public function authenticate()
-    {
-
-        $response = $this->importerManager->curl(
-            $this->config['url'] . '/yunohost/portalapi/login',
-            [
-                'X-Requested-With: YunohostImporter',
-                'Accept-Encoding: gzip, deflate, br',
-            ],
-            true,
-            ['credentials' => $this->config['auth']['user'] . ':' . $this->config['auth']['password']],
-            (empty($this->config['noSSLCheck']) ? false : $this->config['noSSLCheck']),
-            true
-        );
-        preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $response, $matches);
-        return $matches[1][0] ?? null;
-    }
-
     public function getData()
     {
-        $cookie = $this->authenticate();
-        $response = $this->importerManager->curl(
-            $this->config['url'] . '/yunohost/portalapi/me',
-            [
-                'X-Requested-With: YunohostImporter',
-                'Accept-Encoding: gzip, deflate, br',
-                'Cookie: ' . $cookie
-            ],
-            false,
-            [],
-            (empty($this->config['noSSLCheck']) ? false : $this->config['noSSLCheck'])
-        );
-        $data = json_decode($response, true)['apps'] ?? null;
-        return $data ?? null;
+        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-app-list.sh --output-as json 2>&1', $output, $retval);
+
+        if ($retval == 0) {
+            $data = json_decode($output[0], true)['apps'] ?? null;
+        } else {
+            exit('yunohost-app-list.sh returned an error:'."\n".implode('<br>', $output)."\n");
+        }
+        return $data['apps'] ?? null;
     }
 
     public function mapData($data)
     {
         $preparedData = [];
+
         if (is_array($data)) {
             foreach ($data as $i => $item) {
-                $preparedData[$i]['bf_titre'] = $item['label'];
-                $preparedData[$i]['yunohost_app_id'] = $i;
-                $preparedData[$i]['bf_description'] = $item['description'][$this->config['lang']];
-                $preparedData[$i]['listeListeVisibilite'] = $item['public'] ? 'pub' : 'priv';
-                $preparedData[$i]['imagebf_image'] = $this->importerManager->downloadFile('https:' . $item['logo'], $this->config['noSSLCheck']);
-                $preparedData[$i]['bf_url'] = 'https://' . $item['url'];
+                if (!empty($item['domain_path'])) {
+                    $preparedData[$i]['bf_titre'] = $item['name'];
+                    $preparedData[$i]['yunohost_app_id'] = $item['settings']['app'];
+                    $preparedData[$i]['bf_description'] = $item['manifest']['description'][$this->config['lang']];
+                    $preparedData[$i]['listeListeVisibilite'] = in_array('visitors', $item['permissions'][$item['settings']['app'].'.main']['allowed']) ? 'pub' : 'priv';
+                    $preparedData[$i]['imagebf_image'] = $this->importerManager->downloadFile('https://app.yunohost.org/default/v3/logos/'.$item['logo'].'.png');
+                    $preparedData[$i]['bf_url'] = 'https://' . $item['domain_path'];
+                }
             }
         }
         return $preparedData;

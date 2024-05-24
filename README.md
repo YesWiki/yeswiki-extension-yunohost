@@ -13,6 +13,7 @@ This plugin needs two things to be set-up:
 
 ```
 <user> ALL = (root) NOPASSWD: /home/<user>/path/to/yeswiki/tools/yunohost/private/scripts/yunohost-user-info.sh
+<user> ALL = (root) NOPASSWD: /home/<user>/path/to/yeswiki/tools/yunohost/private/scripts/yunohost-app-list.sh
 ```
 
 `<user>` being the system username running the php script.
