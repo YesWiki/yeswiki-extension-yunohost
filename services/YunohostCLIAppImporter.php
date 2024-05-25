@@ -83,7 +83,7 @@ EOT,
 
     public function getData()
     {
-        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-app-list.sh --full --output-as json 2>&1', $output, $retval);
+        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-app-list.sh --full --output-as json', $output, $retval);
 
         if ($retval == 0) {
             $data = json_decode($output[0], true)['apps'] ?? null;
@@ -97,17 +97,23 @@ EOT,
     {
         $preparedData = [];
 
-        if (is_array($data)) {
+        if (is_array($data) && !empty($data)) {
             foreach ($data as $i => $item) {
                 if (!empty($item['domain_path'])) {
                     $preparedData[$i]['bf_titre'] = $item['name'];
                     $preparedData[$i]['yunohost_app_id'] = $item['settings']['app'];
                     $preparedData[$i]['bf_description'] = $item['manifest']['description'][$this->config['lang']];
-                    $preparedData[$i]['listeListeVisibilite'] = in_array('visitors', $item['permissions'][$item['settings']['app'].'.main']['allowed']) ? 'pub' : 'priv';
+                    if (!empty($item['permissions'][$item['settings']['app'].'.main']['allowed'])) {
+                        $preparedData[$i]['listeListeVisibilite'] = in_array('visitors', $item['permissions'][$item['settings']['app'].'.main']['allowed']) ? 'pub' : 'priv';
+                    } else {
+                        $preparedData[$i]['listeListeVisibilite'] = 'priv';
+                    }
                     $preparedData[$i]['imagebf_image'] = $this->importerManager->downloadFile('https://app.yunohost.org/default/v3/logos/'.$item['logo'].'.png');
                     $preparedData[$i]['bf_url'] = 'https://' . $item['domain_path'];
                 }
             }
+        } else {
+            echo 'No datas found from source';
         }
         return $preparedData;
     }
