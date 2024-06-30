@@ -38,7 +38,7 @@ class YunohostCLIUserImporter extends \YesWiki\Importer\Service\Importer
 
         $this->databaseForms = [
             ["bn_id_nature" => null,
-                "bn_label_nature" =>  "Utilistateurs Yunohost",
+                "bn_label_nature" =>  "Utilisateurs Yunohost",
                 "bn_description" =>  "Les utilisateurs disponibles dans le yunohost",
                 "bn_condition" =>  "",
                 "bn_sem_context" =>  "",
@@ -59,7 +59,7 @@ EOT,
 
     public function getData()
     {
-        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-user-list.sh --output-as json', $output, $retval);
+        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-user-list.sh', $output, $retval);
 
         if ($retval == 0) {
             $data = json_decode($output[0], true)['users'] ?? null;

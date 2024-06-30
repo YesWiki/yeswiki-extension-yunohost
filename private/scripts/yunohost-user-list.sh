@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-yunohost user list
+yunohost user list --output-as json
