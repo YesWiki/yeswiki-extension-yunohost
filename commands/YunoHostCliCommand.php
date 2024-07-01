@@ -46,6 +46,6 @@ class YunoHostCliCommand extends Command
         if (!$this->checkConfig($output)) {
             return Command::INVALID;
         }
-        return 0;
+        return Command::SUCCESS;
     }
 }
