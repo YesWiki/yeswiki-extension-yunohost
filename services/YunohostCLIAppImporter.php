@@ -126,18 +126,15 @@ EOT,
         $yunohostAppFunc = static function ($entry1, $entry2) {
             $value1 = isset($entry1['settings']) ? $entry1['settings']['app'] : $entry1['yunohost_app_id'];
             $value2 = isset($entry2['settings']) ? $entry2['settings']['app'] : $entry2['yunohost_app_id'];
-            var_dump('new app', $value1, $value2);
             return $value1 <=> $value2;
         };
         $newYunohostApps = array_udiff($data, $existingEntries, $yunohostAppFunc);
-        var_dump('final new app', $newYunohostApps);
         $removedYunohostApps = array_udiff($existingEntries, $data, $yunohostAppFunc);
-        var_dump('final removed app', $removedYunohostApps);
         foreach ($newYunohostApps as $entry) {
             $entry['antispam'] = 1;
             try {
                 $this->entryManager->create($this->config['formId'], $entry);
-                //echo 'La fiche de l\'application "'.$entry['bf_titre'].'" a bien été créée.'."\n";
+                echo 'La fiche de l\'application "'.$entry['bf_titre'].'" a bien été créée.'."\n";
             } catch (Exception $ex) {
                 echo 'Erreur lors de la création de la fiche application '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
             }

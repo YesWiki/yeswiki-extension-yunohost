@@ -106,22 +106,27 @@ EOT,
     public function syncData(array $data)
     {
         $existingEntries = $this->entryManager->search(['formsIds' => [$this->config['formId']]]);
-        $newYunohostUsers = array_udiff(array_keys($data), array_keys($existingEntries), 'strcasecmp');
-        $removedYunohostUsers = array_udiff(array_keys($existingEntries), array_keys($data), 'strcasecmp');
+        $yunohostUserFunc = static function ($entry1, $entry2) {
+            $value1 = isset($entry1['username']) ? $entry1['username'] : $entry1['bf_titre'];
+            $value2 = isset($entry2['username']) ? $entry2['username'] : $entry2['bf_titre'];
+            return $value1 <=> $value2;
+        };
+        $newYunohostUsers = array_udiff($data, $existingEntries, $yunohostUserFunc);
+        $removedYunohostUsers = array_udiff($existingEntries, $data, $yunohostUserFunc);
         foreach ($newYunohostUsers as $entry) {
-            $data[$entry]['antispam'] = 1;
+            $entry['antispam'] = 1;
             try {
-                $this->entryManager->create($this->config['formId'], $data[$entry]);
-                echo 'L\'utilisateur "'.$data[$entry]['bf_titre'].'" créé.'."\n";
+                $this->entryManager->create($this->config['formId'], $entry);
+                echo 'L\'utilisateur "'.$entry['bf_titre'].'" créé.'."\n";
             } catch (Exception $ex) {
-                echo 'Erreur lors de la création de la fiche utilisateur '.$data[$entry]['bf_titre'].' : '.$ex->getMessage()."\n";
+                echo 'Erreur lors de la création de la fiche utilisateur '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
             }
         }
         foreach ($removedYunohostUsers as $entry) {
             try {
                 // TODO use this when 4.5 is released
-                // $this->entryManager->delete($existingEntries[$entry]['id_fiche']);
-                $tag = $existingEntries[$entry]['id_fiche'];
+                // $this->entryManager->delete($entry['id_fiche']);
+                $tag = $entry['id_fiche'];
                 $fiche = $this->entryManager->getOne($tag, false, null, true);
                 if (empty($fiche)) {
                     throw new Exception("Not existing entry : $tag");
@@ -129,9 +134,9 @@ EOT,
                 $this->services->get(PageManager::class)->deleteOrphaned($tag);
                 $this->services->get(TripleStore::class)->delete($tag, TripleStore::TYPE_URI, null, '', '');
                 $this->services->get(TripleStore::class)->delete($tag, TripleStore::SOURCE_URL_URI, null, '', '');
-                echo 'L\'utilisateur "'.$existingEntries[$entry]['bf_titre'].'" a été supprimé.'."\n";
+                echo 'L\'utilisateur "'.$entry['bf_titre'].'" a été supprimé.'."\n";
             } catch (Exception $ex) {
-                echo 'Erreur lors de la suppression de la fiche utilisateur '.$existingEntries[$entry]['bf_titre'].' : '.$ex->getMessage()."\n";
+                echo 'Erreur lors de la suppression de la fiche utilisateur '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
             }
         }
         return;
