@@ -9,6 +9,8 @@ use YesWiki\Importer\Service\ImporterManager;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Bazar\Service\FormManager;
 use YesWiki\Bazar\Service\ListManager;
+use YesWiki\Core\Service\PageManager;
+use YesWiki\Core\Service\TripleStore;
 use YesWiki\Wiki;
 
 class YunohostCLIUserImporter extends \YesWiki\Importer\Service\Importer
@@ -117,7 +119,16 @@ EOT,
         }
         foreach ($removedYunohostUsers as $entry) {
             try {
-                $this->entryManager->delete($existingEntries[$entry]['id_fiche']);
+                // TODO use this when 4.5 is released
+                // $this->entryManager->delete($existingEntries[$entry]['id_fiche']);
+                $tag = $existingEntries[$entry]['id_fiche'];
+                $fiche = $this->entryManager->getOne($tag, false, null, true);
+                if (empty($fiche)) {
+                    throw new Exception("Not existing entry : $tag");
+                }
+                $this->services->get(PageManager::class)->deleteOrphaned($tag);
+                $this->services->get(TripleStore::class)->delete($tag, TripleStore::TYPE_URI, null, '', '');
+                $this->services->get(TripleStore::class)->delete($tag, TripleStore::SOURCE_URL_URI, null, '', '');
                 echo 'L\'utilisateur "'.$existingEntries[$entry]['bf_titre'].'" a été supprimé.'."\n";
             } catch (Exception $ex) {
                 echo 'Erreur lors de la suppression de la fiche utilisateur '.$existingEntries[$entry]['bf_titre'].' : '.$ex->getMessage()."\n";
