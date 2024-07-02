@@ -8,6 +8,8 @@ use YesWiki\Importer\Service\ImporterManager;
 use YesWiki\Bazar\Service\EntryManager;
 use YesWiki\Bazar\Service\FormManager;
 use YesWiki\Bazar\Service\ListManager;
+use YesWiki\Core\Service\PageManager;
+use YesWiki\Core\Service\TripleStore;
 use YesWiki\Wiki;
 
 class YunohostCLIAppImporter extends \YesWiki\Importer\Service\Importer
@@ -124,6 +126,7 @@ EOT,
         $newAppFunc = static function ($dataEntry, $existingEntry) {
             $value1 = $dataEntry['settings']['app'];
             $value2 = $existingEntry['yunohost_app_id'];
+            var_dump($value1, $value2);
             return $value1 <=> $value2;
         };
         $removedAppFunc = static function ($existingEntry, $dataEntry) {
@@ -137,8 +140,8 @@ EOT,
         foreach ($newYunohostApps as $entry) {
             $entry['antispam'] = 1;
             try {
-                $this->entryManager->create($this->config['formId'], $entry);
-                echo 'La fiche de l\'application "'.$entry['bf_titre'].'" a bien été créée.'."\n";
+                //$this->entryManager->create($this->config['formId'], $entry);
+                //echo 'La fiche de l\'application "'.$entry['bf_titre'].'" a bien été créée.'."\n";
             } catch (Exception $ex) {
                 echo 'Erreur lors de la création de la fiche application '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
             }
