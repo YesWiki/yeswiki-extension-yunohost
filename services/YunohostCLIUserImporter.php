@@ -117,7 +117,7 @@ EOT,
         }
         foreach ($removedYunohostUsers as $entry) {
             try {
-                $this->entryManager->delete($existingEntries[$entry]['id_fiche'], true);
+                $this->entryManager->delete($existingEntries[$entry]['id_fiche']);
                 echo 'L\'utilisateur "'.$existingEntries[$entry]['bf_titre'].'" a été supprimé.'."\n";
             } catch (Exception $ex) {
                 echo 'Erreur lors de la suppression de la fiche utilisateur '.$existingEntries[$entry]['bf_titre'].' : '.$ex->getMessage()."\n";
