@@ -107,7 +107,7 @@ EOT,
         $newYunohostUsers = array_udiff(array_keys($data), array_keys($existingEntries), 'strcasecmp');
         $removedYunohostUsers = array_udiff(array_keys($existingEntries), array_keys($data), 'strcasecmp');
         foreach ($newYunohostUsers as $entry) {
-            $entry['antispam'] = 1;
+            $data[$entry]['antispam'] = 1;
             try {
                 $this->entryManager->create($this->config['formId'], $data[$entry]);
                 echo 'L\'utilisateur "'.$data[$entry]['bf_titre'].'" créé.'."\n";
