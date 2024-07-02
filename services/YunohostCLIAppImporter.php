@@ -123,22 +123,16 @@ EOT,
     public function syncData($data)
     {
         $existingEntries = $this->entryManager->search(['formsIds' => [$this->config['formId']]]);
-        $newAppFunc = static function ($dataEntry, $existingEntry) {
-            $value1 = $dataEntry['settings']['app'];
-            $value2 = $existingEntry['yunohost_app_id'];
-            var_dump('new app', $value1, $value2, $dataEntry, $existingEntry);
+        $yunohostAppFunc = static function ($entry1, $entry2) {
+            $value1 = isset($entry1['settings']) ? $entry1['settings']['app'] : $entry1['yunohost_app_id'];
+            $value2 = isset($entry2['settings']) ? $entry2['settings']['app'] : $entry2['yunohost_app_id'];
+            var_dump('new app', $value1, $value2);
             return $value1 <=> $value2;
         };
-        $removedAppFunc = static function ($existingEntry, $dataEntry) {
-            $value1 = $existingEntry['yunohost_app_id'];
-            $value2 = $dataEntry['settings']['app'];
-            var_dump('removed app', $value1, $value2, $dataEntry, $existingEntry);
-            return $value1 <=> $value2;
-        };
-        $newYunohostApps = array_udiff($data, $existingEntries, $newAppFunc);
-        var_dump('new app', $newYunohostApps);
-        $removedYunohostApps = array_udiff($existingEntries, $data, $removedAppFunc);
-        var_dump('removed app', $removedYunohostApps);
+        $newYunohostApps = array_udiff($data, $existingEntries, $yunohostAppFunc);
+        var_dump('final new app', $newYunohostApps);
+        $removedYunohostApps = array_udiff($existingEntries, $data, $yunohostAppFunc);
+        var_dump('final removed app', $removedYunohostApps);
         foreach ($newYunohostApps as $entry) {
             $entry['antispam'] = 1;
             try {
