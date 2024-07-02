@@ -2,6 +2,7 @@
 
 namespace YesWiki\YunoHost\Service;
 
+use Exception;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use YesWiki\Importer\Service\ImporterManager;
@@ -75,10 +76,10 @@ EOT,
         $preparedData = [];
         if (is_array($data) && !empty($data)) {
             foreach ($data as $i => $item) {
-              $preparedData[$i]['bf_titre'] = $item['username'];
-              $preparedData[$i]['bf_nom'] = $item['fullname'];
-              $preparedData[$i]['bf_mail'] = $item['mail'];
-              $preparedData[$i]['bf_quota'] = $item['mailbox-quota'];
+                $preparedData[$i]['bf_titre'] = $item['username'];
+                $preparedData[$i]['bf_nom'] = $item['fullname'];
+                $preparedData[$i]['bf_mail'] = $item['mail'];
+                $preparedData[$i]['bf_quota'] = $item['mailbox-quota'];
             }
         } else {
             echo 'No datas found from source';
@@ -103,11 +104,17 @@ EOT,
     public function syncData(array $data)
     {
         $existingEntries = $this->entryManager->search(['formIds' => [$this->config['formId']]]);
+        var_dump($existingEntries, $data);
         foreach ($data as $entry) {
             $res = multiArraySearch($existingEntries, 'bf_titre', $entry['bf_titre']);
             if (!$res) {
                 $entry['antispam'] = 1;
-                $this->entryManager->create($this->config['formId'], $entry);
+                try {
+                    $this->entryManager->create($this->config['formId'], $entry);
+                    echo 'L\'utilisateur "'.$entry['bf_titre'].'" créé.'."\n";
+                } catch (Exception $ex) {
+                    echo 'Erreur lors de la création de la fiche utilisateur '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
+                }
             } else {
                 echo 'L\'utilisateur "'.$entry['bf_titre'].'" existe déja.'."\n";
             }
