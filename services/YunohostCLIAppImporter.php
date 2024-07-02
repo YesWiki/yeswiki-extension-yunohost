@@ -126,21 +126,23 @@ EOT,
         $newAppFunc = static function ($dataEntry, $existingEntry) {
             $value1 = $dataEntry['settings']['app'];
             $value2 = $existingEntry['yunohost_app_id'];
-            var_dump($value1, $value2);
+            var_dump('new app', $value1, $value2, $dataEntry, $existingEntry);
             return $value1 <=> $value2;
         };
         $removedAppFunc = static function ($existingEntry, $dataEntry) {
             $value1 = $existingEntry['yunohost_app_id'];
             $value2 = $dataEntry['settings']['app'];
+            var_dump('removed app', $value1, $value2, $dataEntry, $existingEntry);
             return $value1 <=> $value2;
         };
         $newYunohostApps = array_udiff($data, $existingEntries, $newAppFunc);
+        var_dump('new app', $newYunohostApps);
         $removedYunohostApps = array_udiff($existingEntries, $data, $removedAppFunc);
-        var_dump($newYunohostApps, $removedYunohostApps);
+        var_dump('removed app', $removedYunohostApps);
         foreach ($newYunohostApps as $entry) {
             $entry['antispam'] = 1;
             try {
-                //$this->entryManager->create($this->config['formId'], $entry);
+                $this->entryManager->create($this->config['formId'], $entry);
                 //echo 'La fiche de l\'application "'.$entry['bf_titre'].'" a bien été créée.'."\n";
             } catch (Exception $ex) {
                 echo 'Erreur lors de la création de la fiche application '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
