@@ -104,19 +104,23 @@ EOT,
     public function syncData(array $data)
     {
         $existingEntries = $this->entryManager->search(['formsIds' => [$this->config['formId']]]);
-        var_dump(array_keys($existingEntries), array_keys($data));
-        foreach ($data as $entry) {
-            $res = multiArraySearch($existingEntries, 'bf_titre', $entry['bf_titre']);
-            if (!$res) {
-                $entry['antispam'] = 1;
-                try {
-                    $this->entryManager->create($this->config['formId'], $entry);
-                    echo 'L\'utilisateur "'.$entry['bf_titre'].'" créé.'."\n";
-                } catch (Exception $ex) {
-                    echo 'Erreur lors de la création de la fiche utilisateur '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
-                }
-            } else {
-                echo 'L\'utilisateur "'.$entry['bf_titre'].'" existe déja.'."\n";
+        $newYunohostUsers = array_udiff(array_keys($data), array_keys($existingEntries), 'strcasecmp');
+        $removedYunohostUsers = array_udiff(array_keys($existingEntries), array_keys($data), 'strcasecmp');
+        foreach ($newYunohostUsers as $entry) {
+            $entry['antispam'] = 1;
+            try {
+                $this->entryManager->create($this->config['formId'], $data[$entry]);
+                echo 'L\'utilisateur "'.$data[$entry]['bf_titre'].'" créé.'."\n";
+            } catch (Exception $ex) {
+                echo 'Erreur lors de la création de la fiche utilisateur '.$data[$entry]['bf_titre'].' : '.$ex->getMessage()."\n";
+            }
+        }
+        foreach ($removedYunohostUsers as $entry) {
+            try {
+                $this->entryManager->delete($existingEntries[$entry]['id_fiche'], true);
+                echo 'L\'utilisateur "'.$existingEntries[$entry]['bf_titre'].'" a été supprimé.'."\n";
+            } catch (Exception $ex) {
+                echo 'Erreur lors de la suppression de la fiche utilisateur '.$existingEntries[$entry]['bf_titre'].' : '.$ex->getMessage()."\n";
             }
         }
         return;
