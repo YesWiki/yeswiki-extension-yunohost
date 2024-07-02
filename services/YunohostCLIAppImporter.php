@@ -134,41 +134,32 @@ EOT,
         $newYunohostApps = array_udiff($data, $existingEntries, $newAppFunc);
         $removedYunohostApps = array_udiff($existingEntries, $data, $removedAppFunc);
         var_dump($newYunohostApps, $removedYunohostApps);
-        // foreach ($newYunohostApps as $entry) {
-        //     $data[$entry]['antispam'] = 1;
-        //     try {
-        //         $this->entryManager->create($this->config['formId'], $data[$entry]);
-        //         echo 'La fiche de l\'application "'.$data[$entry]['bf_titre'].'" a bien été créée.'."\n";
-        //     } catch (Exception $ex) {
-        //         echo 'Erreur lors de la création de la fiche application '.$data[$entry]['bf_titre'].' : '.$ex->getMessage()."\n";
-        //     }
-        // }
-        // foreach ($removedYunohostApps as $entry) {
-        //     try {
-        //         // TODO use this when 4.5 is released
-        //         // $this->entryManager->delete($existingEntries[$entry]['id_fiche']);
-        //         $tag = $existingEntries[$entry]['id_fiche'];
-        //         $fiche = $this->entryManager->getOne($tag, false, null, true);
-        //         if (empty($fiche)) {
-        //             throw new Exception("Not existing entry : $tag");
-        //         }
-        //         $this->services->get(PageManager::class)->deleteOrphaned($tag);
-        //         $this->services->get(TripleStore::class)->delete($tag, TripleStore::TYPE_URI, null, '', '');
-        //         $this->services->get(TripleStore::class)->delete($tag, TripleStore::SOURCE_URL_URI, null, '', '');
-        //         echo 'L\'application "'.$existingEntries[$entry]['bf_titre'].'" a été supprimé.'."\n";
-        //     } catch (Exception $ex) {
-        //         echo 'Erreur lors de la suppression de la fiche application '.$existingEntries[$entry]['bf_titre'].' : '.$ex->getMessage()."\n";
-        //     }
-        // }
-        // foreach ($data as $entry) {
-        //     $res = multiArraySearch($existingEntries, 'yunohost_app_id', $entry['yunohost_app_id']);
-        //     if (!$res) {
-        //         $entry['antispam'] = 1;
-        //         $this->entryManager->create($this->config['formId'], $entry);
-        //     } else {
-        //         echo 'L\'application "'.$entry['bf_titre'].'" existe déja.'."\n";
-        //     }
-        // }
+        foreach ($newYunohostApps as $entry) {
+            $entry['antispam'] = 1;
+            try {
+                $this->entryManager->create($this->config['formId'], $entry);
+                echo 'La fiche de l\'application "'.$entry['bf_titre'].'" a bien été créée.'."\n";
+            } catch (Exception $ex) {
+                echo 'Erreur lors de la création de la fiche application '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
+            }
+        }
+        foreach ($removedYunohostApps as $entry) {
+            try {
+                // TODO use this when 4.5 is released
+                // $this->entryManager->delete($existingEntries[$entry]['id_fiche']);
+                $tag = $entry['id_fiche'];
+                $fiche = $this->entryManager->getOne($tag, false, null, true);
+                if (empty($fiche)) {
+                    throw new Exception("Not existing entry : $tag");
+                }
+                $this->services->get(PageManager::class)->deleteOrphaned($tag);
+                $this->services->get(TripleStore::class)->delete($tag, TripleStore::TYPE_URI, null, '', '');
+                $this->services->get(TripleStore::class)->delete($tag, TripleStore::SOURCE_URL_URI, null, '', '');
+                echo 'L\'application "'.$entry['bf_titre'].'" a été supprimé.'."\n";
+            } catch (Exception $ex) {
+                echo 'Erreur lors de la suppression de la fiche application '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
+            }
+        }
         return;
     }
 
