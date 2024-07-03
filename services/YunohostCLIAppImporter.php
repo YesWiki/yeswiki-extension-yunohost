@@ -54,6 +54,7 @@ textelong***bf_description***Description de l'application***80***12*** *** ***wi
 liste***ListeVisibilite***Visibilité de l'application*** *** *** *** *** ***1*** *** *** * *** * *** *** *** ***
 texte***yunohost_app_id***Identifiant de l'application Yunohost***255***255*** *** *** ***0*** *** *** * *** * *** *** *** ***
 lien_internet***bf_url***Url d'accès au service*** *** *** *** *** ***0*** *** *** * *** * *** *** *** ***
+acls*** * ***@admins***comments-closed*** ***non*** ***0*** *** *** ***
 EOT,
                 "bn_ce_i18n" =>  "fr-FR",
                 "bn_only_one_entry" =>  "N",
@@ -62,13 +63,13 @@ EOT,
         ];
 
         $this->databaseLists = [
-          'ListeVisibilite' =>  [
-            "titre_liste" => "Visibilité",
-            "label" => [
-              "pub" => "Publique",
-              "priv" => "Privée"
+            'ListeVisibilite' =>  [
+                "titre_liste" => "Visibilité",
+                "label" => [
+                    "pub" => "Publique",
+                    "priv" => "Privée"
+                ]
             ]
-          ]
         ];
     }
 
@@ -85,12 +86,12 @@ EOT,
 
     public function getData()
     {
-        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-app-list.sh --full --output-as json', $output, $retval);
+        exec('sudo -n ' . getcwd() . '/tools/yunohost/private/scripts/yunohost-app-list.sh --full --output-as json', $output, $retval);
 
         if ($retval == 0) {
             $data = json_decode($output[0], true)['apps'] ?? null;
         } else {
-            exit('yunohost-app-list.sh returned an error:'."\n".implode('<br>', $output)."\n");
+            exit('yunohost-app-list.sh returned an error:' . "\n" . implode('<br>', $output) . "\n");
         }
         return $data ?? null;
     }
@@ -105,12 +106,12 @@ EOT,
                     $preparedData[$i]['bf_titre'] = $item['name'];
                     $preparedData[$i]['yunohost_app_id'] = $item['settings']['app'];
                     $preparedData[$i]['bf_description'] = $item['manifest']['description'][$this->config['lang']];
-                    if (!empty($item['permissions'][$item['settings']['app'].'.main']['allowed'])) {
-                        $preparedData[$i]['listeListeVisibilite'] = in_array('visitors', $item['permissions'][$item['settings']['app'].'.main']['allowed']) ? 'pub' : 'priv';
+                    if (!empty($item['permissions'][$item['settings']['app'] . '.main']['allowed'])) {
+                        $preparedData[$i]['listeListeVisibilite'] = in_array('visitors', $item['permissions'][$item['settings']['app'] . '.main']['allowed']) ? 'pub' : 'priv';
                     } else {
                         $preparedData[$i]['listeListeVisibilite'] = 'priv';
                     }
-                    $preparedData[$i]['imagebf_image'] = $this->importerManager->downloadFile('https://app.yunohost.org/default/v3/logos/'.$item['logo'].'.png');
+                    $preparedData[$i]['imagebf_image'] = $this->importerManager->downloadFile('https://app.yunohost.org/default/v3/logos/' . $item['logo'] . '.png');
                     $preparedData[$i]['bf_url'] = 'https://' . $item['domain_path'];
                 }
             }
@@ -134,9 +135,9 @@ EOT,
             $entry['antispam'] = 1;
             try {
                 $this->entryManager->create($this->config['formId'], $entry);
-                echo 'La fiche de l\'application "'.$entry['bf_titre'].'" a bien été créée.'."\n";
+                echo 'La fiche de l\'application "' . $entry['bf_titre'] . '" a bien été créée.' . "\n";
             } catch (Exception $ex) {
-                echo 'Erreur lors de la création de la fiche application '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
+                echo 'Erreur lors de la création de la fiche application ' . $entry['bf_titre'] . ' : ' . $ex->getMessage() . "\n";
             }
         }
         foreach ($removedYunohostApps as $entry) {
@@ -151,9 +152,9 @@ EOT,
                 $this->services->get(PageManager::class)->deleteOrphaned($tag);
                 $this->services->get(TripleStore::class)->delete($tag, TripleStore::TYPE_URI, null, '', '');
                 $this->services->get(TripleStore::class)->delete($tag, TripleStore::SOURCE_URL_URI, null, '', '');
-                echo 'L\'application "'.$entry['bf_titre'].'" a été supprimé.'."\n";
+                echo 'L\'application "' . $entry['bf_titre'] . '" a été supprimé.' . "\n";
             } catch (Exception $ex) {
-                echo 'Erreur lors de la suppression de la fiche application '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
+                echo 'Erreur lors de la suppression de la fiche application ' . $entry['bf_titre'] . ' : ' . $ex->getMessage() . "\n";
             }
         }
         return;
@@ -168,7 +169,7 @@ EOT,
                 // TODO : comment etre sur de l'id ?
                 $this->listManager->create($list['titre_liste'], $list['label']);
             } else {
-                echo 'La liste "'.$list['titre_liste'].'" existe deja.'."\n";
+                echo 'La liste "' . $list['titre_liste'] . '" existe deja.' . "\n";
                 // test if compatible
             }
         }
@@ -178,7 +179,7 @@ EOT,
             $this->databaseForms[0]['bn_id_nature'] = $this->config['formId'];
             $this->formManager->create($this->databaseForms[0]);
         } else {
-            echo 'La base bazar existe deja.'."\n";
+            echo 'La base bazar existe deja.' . "\n";
             // test if compatible
         }
         return;

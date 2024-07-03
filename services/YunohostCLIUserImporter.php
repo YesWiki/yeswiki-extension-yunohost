@@ -40,7 +40,8 @@ class YunohostCLIUserImporter extends \YesWiki\Importer\Service\Importer
         $this->config = $config;
 
         $this->databaseForms = [
-            ["bn_id_nature" => null,
+            [
+                "bn_id_nature" => null,
                 "bn_label_nature" =>  "Utilisateurs Yunohost",
                 "bn_description" =>  "Les utilisateurs disponibles dans le yunohost",
                 "bn_condition" =>  "",
@@ -52,6 +53,7 @@ texte***bf_titre***Nom d'utilisateur*** *** *** *** ***text***1*** *** *** * ***
 texte***bf_nom***Nom complet*** *** *** *** ***text***0*** *** *** * *** * *** *** *** ***
 champs_mail***bf_mail***Email*** *** % *** ***form*** ***0***0*** *** * *** % *** *** *** ***
 texte***bf_quota***Quota mail*** *** *** *** ***number***0*** *** *** * *** * *** *** *** ***
+acls***@admins***@admins***comments-closed*** ***non*** ***0*** *** *** ***                
 EOT,
                 "bn_ce_i18n" =>  "fr-FR",
                 "bn_only_one_entry" =>  "N",
@@ -62,12 +64,12 @@ EOT,
 
     public function getData()
     {
-        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-user-list.sh', $output, $retval);
+        exec('sudo -n ' . getcwd() . '/tools/yunohost/private/scripts/yunohost-user-list.sh', $output, $retval);
 
         if ($retval == 0) {
             $data = json_decode($output[0], true)['users'] ?? null;
         } else {
-            exit('yunohost-user-list.sh returned an error:'."\n".implode('<br>', $output)."\n");
+            exit('yunohost-user-list.sh returned an error:' . "\n" . implode('<br>', $output) . "\n");
         }
 
         return $data;
@@ -97,7 +99,7 @@ EOT,
             $this->databaseForms[0]['bn_id_nature'] = $this->config['formId'];
             $this->formManager->create($this->databaseForms[0]);
         } else {
-            echo 'La base bazar existe deja.'."\n";
+            echo 'La base bazar existe deja.' . "\n";
             // test if compatible
         }
         return;
@@ -117,9 +119,9 @@ EOT,
             $entry['antispam'] = 1;
             try {
                 $this->entryManager->create($this->config['formId'], $entry);
-                echo 'L\'utilisateur "'.$entry['bf_titre'].'" créé.'."\n";
+                echo 'L\'utilisateur "' . $entry['bf_titre'] . '" créé.' . "\n";
             } catch (Exception $ex) {
-                echo 'Erreur lors de la création de la fiche utilisateur '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
+                echo 'Erreur lors de la création de la fiche utilisateur ' . $entry['bf_titre'] . ' : ' . $ex->getMessage() . "\n";
             }
         }
         foreach ($removedYunohostUsers as $entry) {
@@ -134,9 +136,9 @@ EOT,
                 $this->services->get(PageManager::class)->deleteOrphaned($tag);
                 $this->services->get(TripleStore::class)->delete($tag, TripleStore::TYPE_URI, null, '', '');
                 $this->services->get(TripleStore::class)->delete($tag, TripleStore::SOURCE_URL_URI, null, '', '');
-                echo 'L\'utilisateur "'.$entry['bf_titre'].'" a été supprimé.'."\n";
+                echo 'L\'utilisateur "' . $entry['bf_titre'] . '" a été supprimé.' . "\n";
             } catch (Exception $ex) {
-                echo 'Erreur lors de la suppression de la fiche utilisateur '.$entry['bf_titre'].' : '.$ex->getMessage()."\n";
+                echo 'Erreur lors de la suppression de la fiche utilisateur ' . $entry['bf_titre'] . ' : ' . $ex->getMessage() . "\n";
             }
         }
         return;
