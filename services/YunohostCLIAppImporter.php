@@ -105,7 +105,7 @@ EOT,
                 if (!empty($item['domain_path'])) {
                     $preparedData[$i]['bf_titre'] = $item['name'];
                     $preparedData[$i]['yunohost_app_id'] = $item['settings']['app'];
-                    $preparedData[$i]['bf_description'] = $item['manifest']['description'][$this->config['lang']];
+                    $preparedData[$i]['bf_description'] = $item['manifest']['description'][$this->config['lang']] ?? $item['manifest']['description']['en'] ?? '';
                     if (!empty($item['permissions'][$item['settings']['app'] . '.main']['allowed'])) {
                         $preparedData[$i]['listeListeVisibilite'] = in_array('visitors', $item['permissions'][$item['settings']['app'] . '.main']['allowed']) ? 'pub' : 'priv';
                     } else {
