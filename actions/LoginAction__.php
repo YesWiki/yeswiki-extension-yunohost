@@ -19,13 +19,13 @@ class LoginAction__ extends YesWikiAction
             if ($authController->getLoggedUser()) {
                 $this->output = preg_replace(
                     '~"https?://.*action=logout"~Ui',
-                    'https://'.$this->params->get('yunohost_sso_domain').'/yunohost/sso/?action=logout&r='.$encodedUrl,
+                    'https://'.$this->params->get('yunohost_sso_domain').'/yunohost/portalapi/logout?referer_redirect',
                     $this->output
                 );
             } else {
-                $this->output = '<a href="https://'.$this->params->get('yunohost_sso_domain').'/yunohost/sso/?r='.$encodedUrl.'" class="btn btn-default btn->
+                $this->output = '<a href="https://'.$this->params->get('yunohost_sso_domain').'/yunohost/sso/login?r='.$encodedUrl.'" class="btn btn-default btn->
             <i class="glyphicon glyphicon-user"></i> '._t('LOGIN_LOGIN').'</a>';
             }
         }
     }
-}
+} 
