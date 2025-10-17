@@ -62,13 +62,13 @@ EOT,
             ]
         ];
 
-        $this->databaseLists = [
-            'ListeVisibilite' =>  [
-                "titre_liste" => "Visibilité",
-                "label" => [
-                    "pub" => "Publique",
-                    "priv" => "Privée"
-                ]
+        $this->databaseLists =[
+            [
+                "title" => "Visibilité",
+                "nodes" => [
+                    [ "id" => "pub", "label" => "Publique", "children" => [] ],
+                    [ "id" => "priv", "label" => "Privée", "children" => [] ],
+                ],
             ]
         ];
     }
@@ -167,9 +167,9 @@ EOT,
             $liste = $this->listManager->getOne($tag);
             if (empty($liste)) {
                 // TODO : comment etre sur de l'id ?
-                $this->listManager->create($list['titre_liste'], $list['label']);
+                $this->listManager->create($list['title'], $list['nodes']);
             } else {
-                echo 'La liste "' . $list['titre_liste'] . '" existe deja.' . "\n";
+                echo 'La liste "' . $list['title'] . '" existe deja.' . "\n";
                 // test if compatible
             }
         }
