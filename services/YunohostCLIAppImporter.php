@@ -62,7 +62,7 @@ EOT,
             ]
         ];
 
-        $this->databaseLists =[
+        $this->databaseLists = [
             [
                 "title" => "Visibilité",
                 "nodes" => [
@@ -123,6 +123,12 @@ EOT,
 
     public function syncData($data)
     {
+        $form = $this->formManager->getOne($this->config['formId']);
+        $yunohostAppIdExists = in_array('yunohost_app_id', array_column($form['template'], 1));
+        if (!$yunohostAppIdExists) {
+            echo 'The form with id '.$this->config['formId'].' doesn\'t contain an yunohost_app_id, better not to sync';
+            return;
+        }
         $existingEntries = $this->entryManager->search(['formsIds' => [$this->config['formId']]]);
         $yunohostAppFunc = static function ($entry1, $entry2) {
             $value1 = isset($entry1['settings']) ? $entry1['settings']['app'] : $entry1['yunohost_app_id'];
