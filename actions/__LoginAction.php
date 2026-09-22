@@ -36,7 +36,7 @@ class __LoginAction extends YesWikiAction
                         $output = null;
                         $retval = null;
 
-                        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-user-info.sh ' . escapeshellcmd($_SERVER['REMOTE_USER']) . ' --output-as json 2>&1', $output, $retval);
+                        exec('sudo -n '.getcwd().'/tools/yunohost/private/scripts/yunohost-user-info.sh ' . escapeshellarg($_SERVER['REMOTE_USER']) . ' --output-as json 2>&1', $output, $retval);
 
                         if ($retval == 0) {
                             $email = json_decode($output[0])->mail;

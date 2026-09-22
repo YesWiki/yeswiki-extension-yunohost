@@ -1,20 +1,48 @@
-# YunoHost YesWiki extension
+# yeswiki-extension-yunohost
 
-Permits the use of Yunohost SSO in YesWiki, and provides importers for displaying yunohost apps as bazar entries.
+ - [English](#english)
+ - [Français](#français)
 
-For now, this extension must be installed on a YesWiki hosted locally on a YunoHost system.
+## English
 
-## Installation
+[YesWiki](https://yeswiki.net/) extension. Uses the YunoHost SSO inside YesWiki and imports yunohost apps as bazar entries.
 
-This plugin needs two things to be set-up:
+### Authors
 
-- `"enable_yunohost_sso" => true,` in the config file `wakka.config.php`
-- add a no password sudo rule **only for the tools/yunohost/private/scripts/yunohost-user-list.sh** in `/etc/sudoers.d/<user>`
+ - all contributors indicated on this page : <https://github.com/YesWiki/yeswiki-extension-yunohost/graphs/contributors>
 
-```
-<user> ALL = (root) NOPASSWD: /home/<user>/path/to/yeswiki/tools/yunohost/private/scripts/yunohost-user-info.sh
-<user> ALL = (root) NOPASSWD: /home/<user>/path/to/yeswiki/tools/yunohost/private/scripts/yunohost-app-list.sh
-<user> ALL = (root) NOPASSWD: /home/<user>/path/to/yeswiki/tools/yunohost/private/scripts/yunohost-user-list.sh
-```
+### Install
 
-`<user>` being the system username running the php script.
+In page `GererMisesAJour` on your YesWiki website, search extension `yunohost` and install it.
+
+### Usage
+
+Usage help is described in `http://example.com/?doc/#tools/yunohost/en/README.md` (replacing `http://example.com/?` by the `baseUrl` of your wiki). The same file can be found also here : https://github.com/YesWiki/yeswiki-extension-yunohost/blob/main/docs/en/README.md
+
+### Warranty
+
+Like written in the licence file, there is no warranty on usage of this software. Refer to licence file for details.
+Developpers of this extension can not be responsible of consequences of the usage of this extension.
+
+----
+
+## Français
+
+Extension [YesWiki](https://yeswiki.net/). Utilise le SSO YunoHost dans YesWiki et importe les applications yunohost comme fiches bazar.
+
+### Auteurs
+
+ - tous les contributeurs et toutes les contributrices indiqués sur cette page : <https://github.com/YesWiki/yeswiki-extension-yunohost/graphs/contributors>
+
+### Installation
+
+Dans la page `GererMisesAJour` de votre YesWiki, recherchez l'extension `yunohost` et installez-la.
+
+### Utilisation
+
+L'aide sur l'utilisation peut être trouvée sur `http://example.com/?doc/#tools/yunohost/fr/README.md` (en remplaçant `http://example.com/?` par `baseUrl` de votre wiki). Le même fichier peut aussi être trouvé ici : https://github.com/YesWiki/yeswiki-extension-yunohost/blob/main/docs/fr/README.md
+
+### Garantie
+
+Comme énoncé dans le fichier de licence, il n'y a pas de garantie sur l'usage de ce logiciel. Se référer au fichier de licence pour les détails.
+Les développeurs de cette extension ne peuvent être responsables des conséquences qui découlent de l'usage de cette extension.

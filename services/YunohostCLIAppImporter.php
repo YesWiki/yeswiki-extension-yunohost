@@ -84,6 +84,14 @@ EOT,
         return $config;
     }
 
+    // declares the fields needed in the yeswiki-extension-importer admin UI (AdminImportersAction)
+    public static function getAdminFields(): array
+    {
+        return [
+            'lang' => ['type' => 'text', 'required' => true],
+        ];
+    }
+
     public function getData()
     {
         exec('sudo -n ' . getcwd() . '/tools/yunohost/private/scripts/yunohost-app-list.sh --full --output-as json', $output, $retval);

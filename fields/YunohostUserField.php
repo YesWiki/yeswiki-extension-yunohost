@@ -66,11 +66,30 @@ class YunohostUserField extends BazarField
     {
         return $this->getWiki()->config['yunohost'] ?? [];
     }
+    /** Lance une commande yunohost sans passer par un shell, et rend la sortie et le code de retour. */
+    private function runYunohost(array $arguments): array
+    {
+        $prefix = preg_split('/\s+/', trim($this->cmdPrefix), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $command = array_merge($prefix, ['yunohost'], array_map('strval', $arguments));
+
+        $process = @proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        if (!is_resource($process)) {
+            return [[''], 1];
+        }
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $retval = proc_close($process);
+
+        $output = preg_split('/\r\n|\r|\n/', trim($stdout . "\n" . $stderr), -1, PREG_SPLIT_NO_EMPTY);
+
+        return [empty($output) ? [''] : $output, $retval];
+    }
+
     protected function getYunohostUsernames()
     {
-        $output = $retval = null;
-        $cmd = $this->cmdPrefix . ' yunohost user list --fields username 2>&1';
-        exec($cmd, $output, $retval);
+        [$output, $retval] = $this->runYunohost(['user', 'list', '--fields', 'username']);
         $users = [];
         foreach ($output as $outputline) {
             preg_match('/^\s*username:\s*(.*)$/s', $outputline, $matches, PREG_OFFSET_CAPTURE, 0);
@@ -86,20 +105,13 @@ class YunohostUserField extends BazarField
         if (in_array($userValues['name'], $users)) {
             throw new UserNameAlreadyUsedException();
         }
-        $output = $retval = null;
-        // To be able to sudo use yunohost with your php user without password,
-        // you need to add in /etc/sudoers (with visudo) something like
-        // <myunixuser> ALL=(root) NOPASSWD: /usr/bin/yunohost
-        // utiliser proc_open avec des arguments plutot que de echaper / concatener
-        $cmd = $this->cmdPrefix . ' yunohost user create ' . $userValues['name']
-            . ' -F \'' . $userValues['fullname'] . '\''
-            . ' -d ' . $this->userMailDomain
-            . ' -p \'' . $userValues['password'] . '\''
-            . ' 2>&1 &';
-        exec($cmd, $output, $retval);
-        // handle errors
-        if ($retval == 1) {
-            // TODO : LC_ALL=fr_FR.UTF-8
+        [$output, $retval] = $this->runYunohost([
+            'user', 'create', $userValues['name'],
+            '-F', $userValues['fullname'],
+            '-d', $this->userMailDomain,
+            '-p', $userValues['password'],
+        ]);
+        if ($retval !== 0) {
             if (preg_match('/^This password is among the most used passwords in the world.*$/s', $output[0], $matches, PREG_OFFSET_CAPTURE, 0)) {
                 throw new Exception('Le mot de passe utilisé est trop courant, il fait parti de la liste des mots de passe les plus utilisés, et pose des problème de sécurité, veuillez le changer.');
             } elseif (preg_match('/^The password needs to be at least 8 characters long.*$/s', $output[0], $matches, PREG_OFFSET_CAPTURE, 0)) {
@@ -108,13 +120,11 @@ class YunohostUserField extends BazarField
                 throw new Exception($output[0]);
             }
         }
-        $cmd = $this->cmdPrefix . ' yunohost user update ' . $userValues['name']
-            . ' --add-mailforward ' . $userValues[$this->emailField]
-            . ' 2>&1 &';
-        exec($cmd, $output, $retval);
-        //dump($output);
-        // handle errors
-        if ($retval == 1) {
+        [$output, $retval] = $this->runYunohost([
+            'user', 'update', $userValues['name'],
+            '--add-mailforward', $userValues[$this->emailField],
+        ]);
+        if ($retval !== 0) {
             throw new Exception($output[0]);
         }
     }
