@@ -63,7 +63,7 @@ EOT,
         ];
 
         $this->databaseLists = [
-            [
+            'ListeVisibilite' => [
                 "title" => "Visibilité",
                 "nodes" => [
                     [ "id" => "pub", "label" => "Publique", "children" => [] ],
@@ -73,11 +73,7 @@ EOT,
         ];
     }
 
-    /**
-     * Check if config input is good enough to be used by Importer
-     * @param array $config
-     * @return array $config checked config
-     */
+    // checks that the config is good enough to be used by the importer
     public function checkConfig(array $config)
     {
         $config = parent::checkConfig($config);
@@ -156,8 +152,6 @@ EOT,
         }
         foreach ($removedYunohostApps as $entry) {
             try {
-                // TODO use this when 4.5 is released
-                // $this->entryManager->delete($existingEntries[$entry]['id_fiche']);
                 $tag = $entry['id_fiche'];
                 $fiche = $this->entryManager->getOne($tag, false, null, true);
                 if (empty($fiche)) {
@@ -176,26 +170,41 @@ EOT,
 
     public function syncFormModel()
     {
-        // test if the lists exist, if not, install them
         foreach ($this->databaseLists as $tag => $list) {
             $liste = $this->listManager->getOne($tag);
             if (empty($liste)) {
-                // TODO : comment etre sur de l'id ?
-                $this->listManager->create($list['title'], $list['nodes']);
+                $this->listManager->create($list['title'], $list['nodes'], $tag);
             } else {
                 echo 'La liste "' . $list['title'] . '" existe deja.' . "\n";
-                // test if compatible
             }
         }
-        // test if the form exists, if not, install it
+        $this->removeDuplicatedLists();
         $form = $this->formManager->getOne($this->config['formId']);
         if (empty($form)) {
             $this->databaseForms[0]['bn_id_nature'] = $this->config['formId'];
             $this->formManager->create($this->databaseForms[0]);
         } else {
             echo 'La base bazar existe deja.' . "\n";
-            // test if compatible
         }
         return;
+    }
+
+    // deletes the unused copies of the visibility list created by previous versions on each sync
+    protected function removeDuplicatedLists()
+    {
+        $expected = $this->databaseLists['ListeVisibilite'];
+        $expectedNodes = array_column($expected['nodes'], 'label', 'id');
+        $templates = implode("\n", array_column($this->formManager->getAll(), 'bn_template'));
+        foreach ($this->listManager->getAll() as $tag => $list) {
+            if (!preg_match('/^ListVisibilite\d*$/', $tag)
+                || ($list['title'] ?? '') !== $expected['title']
+                || array_column($list['nodes'] ?? [], 'label', 'id') !== $expectedNodes
+                || strpos($templates, '***' . $tag . '***') !== false) {
+                continue;
+            }
+            $this->services->get(PageManager::class)->deleteOrphaned($tag);
+            $this->services->get(TripleStore::class)->delete($tag, TripleStore::TYPE_URI, null, '', '');
+            echo 'La liste en double "' . $tag . '" a été supprimée.' . "\n";
+        }
     }
 }
