@@ -51,7 +51,7 @@ class YunohostCLIAppImporter extends \YesWiki\Importer\Service\Importer
 texte***bf_titre***Nom de l'application***255***255*** *** ***text***1*** *** *** * *** * *** *** *** ***
 image***bf_image***Logo***400***400***1000***1000***right***0*** *** *** * *** * *** *** *** ***
 textelong***bf_description***Description de l'application***80***12*** *** ***wiki***0*** *** *** * *** * *** *** *** ***
-liste***ListeVisibilite***Visibilité de l'application*** *** *** *** *** ***1*** *** *** * *** * *** *** *** ***
+liste***ListeVisibilite***Visibilité de l'application*** *** *** ***listeListeVisibilite*** ***1*** *** *** * *** * *** *** *** ***
 texte***yunohost_app_id***Identifiant de l'application Yunohost***255***255*** *** *** ***0*** *** *** * *** * *** *** *** ***
 lien_internet***bf_url***Url d'accès au service*** *** *** *** *** ***0*** *** *** * *** * *** *** *** ***
 acls*** * ***@admins***comments-closed*** ***non*** ***0*** *** *** ***
@@ -185,8 +185,29 @@ EOT,
             $this->formManager->create($this->databaseForms[0]);
         } else {
             echo 'La base bazar existe deja.' . "\n";
+            $this->nameVisibilityField($form);
         }
         return;
+    }
+
+    // gives the visibility field of a form made by earlier versions the property name YesWiki needs to store and show its value
+    protected function nameVisibilityField(array $form)
+    {
+        $lines = preg_split('/\r?\n/', $form['bn_template']);
+        $changed = false;
+        foreach ($lines as $i => $line) {
+            $columns = explode('***', $line);
+            if (trim($columns[0] ?? '') === 'liste' && trim($columns[1] ?? '') === 'ListeVisibilite' && trim($columns[6] ?? '') === '') {
+                $columns[6] = 'listeListeVisibilite';
+                $lines[$i] = implode('***', $columns);
+                $changed = true;
+            }
+        }
+        if ($changed) {
+            $form['bn_template'] = implode("\n", $lines);
+            $this->formManager->update($form);
+            echo 'Le champ de visibilité du formulaire a reçu son nom.' . "\n";
+        }
     }
 
     // deletes the unused copies of the visibility list created by previous versions on each sync
