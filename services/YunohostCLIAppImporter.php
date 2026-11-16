@@ -115,7 +115,9 @@ EOT,
                     } else {
                         $preparedData[$i]['listeListeVisibilite'] = 'priv';
                     }
-                    $preparedData[$i]['imagebf_image'] = $this->importerManager->downloadFile('https://apps.yunohost.org/default/v3/logos/' . $item['logo'] . '.png');
+                    $preparedData[$i]['imagebf_image'] = empty($item['logo'])
+                        ? ''
+                        : $this->importerManager->downloadFile('https://apps.yunohost.org/default/v3/logos/' . $item['logo'] . '.png');
                     $preparedData[$i]['bf_url'] = 'https://' . $item['domain_path'];
                 }
             }
